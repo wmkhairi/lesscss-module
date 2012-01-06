@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 OpenIDE-Module: org.lesscss/1
-OpenIDE-Module-Implementation-Version: 6
+OpenIDE-Module-Implementation-Version: 7
 OpenIDE-Module-Layer: org/lesscss/layer.xml
 OpenIDE-Module-Localizing-Bundle: org/lesscss/Bundle.properties
 
