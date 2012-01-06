@@ -1,0 +1,185 @@
+PARSER_BEGIN(LessCSSParser)
+
+package org.lesscss.jcclexer;
+
+public class LessCSSParser {}
+
+PARSER_END(LessCSSParser)
+
+/* WHITE SPACE */
+
+TOKEN :
+{
+    < WHITESPACE:
+        " "
+      | "\t"
+      | "\n"
+      | "\r"
+      | "\f"
+    >
+}
+
+/* COMMENTS */
+
+MORE :
+{
+    "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_MULTI_LINE_COMMENT>
+TOKEN :
+{
+    < MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT>
+MORE :
+{
+    < ~[] >
+}
+
+TOKEN :
+{
+    < SINGLE_LINE_COMMENT: "//" (~["\n", "\r"])* ("\n" | "\r" | "\r\n")? >
+}
+
+/* RESERVE WORDS */
+
+TOKEN :
+{
+    < IMPORT: "@import" >
+  | < IMPORTANT: "!important" >
+  | < URL: "url" >
+  | < URI: "uri" >
+}
+
+/* SEPARATORS */
+
+TOKEN :
+{
+    < LPAREN: "(" >
+  | < RPAREN: ")" >
+  | < LBRACE: "{" >
+  | < RBRACE: "}" >
+  | < LBRACKET: "[" >
+  | < RBRACKET: "]" >
+  | < COLON: ":" >
+  | < SEMICOLON: ";" >
+  | < COMMA: "," >
+  | < AT: "@" >
+  | < DOT: "." >
+  | < HASH: "#" >
+  | < ASSIGN: "=" >
+  | < LT: "<" >
+  | < GT: ">" >
+  | < PLUS: "+" >
+  | < MINUS: "-" >
+  | < STAR: "*" >
+  | < SLASH: "/" >
+}
+
+/* UNITS OF MEASURE */
+TOKEN :
+{
+    < MEASUREMENT: <NUMBER_LITERAL> ( <EM> | <UNIT> ) >
+  | < EM: "em" > /* EM HTML Element, as well as unit-of-measure */
+  | < UNIT:
+        < PIXELS >
+      | < PERCENT >
+      | < INCHES >
+      | < CENTIMETERS >
+      | < MILIMETERS >
+      | < EX >
+      | < POINT >
+      | < PICA >
+      | < MS >
+      | < S >
+      | < DEGREE >
+    >
+  | < #PIXELS: "px" >
+  | < #PERCENT: "%" >
+  | < #INCHES: "in" >
+  | < #CENTIMETERS: "cm" >
+  | < #MILIMETERS: "mm" >
+  | < #EX: "ex" >
+  | < #POINT: "pt" >
+  | < #PICA: "pc" >
+  | < #MS: "ms" >
+  | < #S: "s" >
+  | < #DEGREE: "deg" >
+}
+
+/* LITERALS */
+
+TOKEN :
+{
+    < NUMBER_LITERAL:
+        < INTEGER_LITERAL >
+      | < DECIMAL_LITERAL >
+    >
+  | < #INTEGER_LITERAL: ("-")? ("0" | ( ["1"-"9"] (["0"-"9"])* )) >
+  | < #DECIMAL_LITERAL:
+        ("-")? (["0"-"9"])+ "." (["0"-"9"])*
+      | "." (["0"-"9"])+
+    >
+  | < HEX_LITERAL: "#" (["0"-"9","a"-"f","A"-"F"]){3,9} >
+  | < STRING_LITERAL:
+        <CHARACTER_LITERAL>
+      | "\""
+        (
+            (~["\"","\\","\n","\r"])
+          | ("\\"
+                (
+                    ["n","t","b","r","f","\\","'","\""]
+                  | ["0"-"7"] ( ["0"-"7"] )?
+                  | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+                )
+            )
+        )*
+        "\""
+    >
+  | < CHARACTER_LITERAL:
+        "'"
+        (
+            (~["'","\\","\n","\r"])
+          | ("\\"
+                (
+                    ["n","t","b","r","f","\\","'","\""]
+                  | ["0"-"7"] ( ["0"-"7"] )?
+                  | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+                )
+            )
+        )*
+        "'"
+    >
+  | < QUOTE: ("\"" | "'") >
+}
+
+/* SPECIAL CASE VALUES */
+
+TOKEN :
+{
+    < URL_VALUE: <URL> "(" (~[")"])+ ")" >
+  | < URI_VALUE: <URI> "(" (~[")"])+ ")" >
+  | < SELECTOR_ATTRIBUTE: "[" (~["]"])+ "]" >
+}
+
+/* SELECTORS */
+
+TOKEN :
+{
+    < VARIABLE_SELECTOR: "@" <SELECTOR> >
+  | < CLASS_SELECTOR: "." <SELECTOR> >
+  | < PSEUDO_SELECTOR: ":" <SELECTOR> >
+  | < ID_SELECTOR: "#" <SELECTOR> >
+  | < SELECTOR: <START_CHARS>(<VALID_CHARS>)* >
+  | < #START_CHARS: ["a"-"z","A"-"Z","-"] >
+  | < #VALID_CHARS: ["a"-"z","A"-"Z","0"-"9","-","_","*","."] >
+}
+
+/* WILDCARD FOR EVERYTHING ELSE */
+
+TOKEN :
+{
+    < WILDCARD: (~["a"-"z","A"-"Z","0"-"9","-","_","*","."]) >
+}
